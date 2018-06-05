@@ -1,6 +1,6 @@
 <?php
 
-namespace PetrKnap\Utils\Security;
+namespace Netpromotion\DataSigner;
 
 class SignedDataException extends \Exception
 {

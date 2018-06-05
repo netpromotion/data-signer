@@ -1,32 +1,15 @@
-<?php namespace PetrKnap\Utils\Security;
+<?php
+
+namespace Netpromotion\DataSigner;
+
 /**
  * Static class that provides methods for calculating the hash fingerprints and random salts
  *
  * Methods prefixed with `B64` returns the Base64-encoded output. The length of B64 output can be get from constant
  * named as `{function name}length`, f.e. `B64SHA512length`.
- *
- * @author   Petr Knap <dev@petrknap.cz>
- * @since    2012-04-15
- * @category Security
- * @package  PetrKnap\Utils\Security
- * @version  1.0
- * @license  https://github.com/petrknap/utils/blob/master/LICENSE MIT
- * @homepage http://dev.petrknap.cz/Security/Hash.php.html
- * @see      http://www.aspnet.cz/articles/93-uchovavani-hesel-ve-webovych-aplikacich
- * @example  HashTest.php Test cases
- *
- * @change 1.0 Removed backward compatibility with alpha versions 0.*
- * @change 0.7 Changed licensing from "MS-PL":[http://opensource.org/licenses/ms-pl.html] to "MIT":[https://github.com/petrknap/utils/blob/master/LICENSE]
- * @change 0.7 Moved to `PetrKnap\Utils\Security`
- * @change 0.7 Fully translated PhpDoc
- * @change 0.6 Added support for URL like B64 outputs
- * @change 0.6 Added method `B642URL`:[#method_B642URL]
- * @change 0.6 Added method `URL2B64`:[#method_URL2B64]
- * @change 0.5 Added support for SHA256, SHA384 and SHA512
- * @change 0.4 Added method `RandomBytes`:[#method_RandomBytes]
  */
-class Hash {
-
+class Hash
+{
     /**
      * Length of B64 output from `B64SHA512`:[#method_B64SHA512]
      */
@@ -178,5 +161,4 @@ class Hash {
     public static function URL2B64($URL) {
         return self::B64URLConverter($URL, true);
     }
-
 }

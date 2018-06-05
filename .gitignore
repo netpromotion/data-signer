@@ -1,4 +1,4 @@
-.idea
-vendor
-*.log
-*.lock
+/.idea/
+/vendor/
+/*.log
+/*.lock

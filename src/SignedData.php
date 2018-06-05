@@ -1,4 +1,7 @@
-<?php namespace PetrKnap\Utils\Security;
+<?php
+
+namespace Netpromotion\DataSigner;
+
 /**
  * Provides methods for signing data
  *
@@ -6,24 +9,11 @@
  *
  * To determine the credibility of the data, check the property `IsTrusted`.
  *
- * @author   Petr Knap <dev@petrknap.cz>
- * @since    2012-07-24
- * @category Security
- * @package  PetrKnap\Utils\Security
- * @version  1.4.1
- * @license  https://github.com/petrknap/utils/blob/master/LICENSE MIT
- * @example  SignedData.example.php Example usage
  * @property mixed UnsignedData Unsigned data
  * @property bool IsTrusted Is it credible?
  * @property string SignedData Signed data
  * @property mixed SaltPrefix Salt for better security (inserted before data)
  * @property mixed SaltSuffix Salt for better security (inserted after data)
- *
- * @change 1.4.1 Removed backward compatibility with versions 1.3.*
- * @change 1.4.0 Changed licensing from "MS-PL":[http://opensource.org/licenses/ms-pl.html] to "MIT":[https://github.com/petrknap/utils/blob/master/LICENSE]
- * @change 1.4.0 Moved to `PetrKnap\Utils\Security`
- * @change 1.4.0 Fully translated PhpDocs
- * @change 1.4.0 Private `get*` and `set*` methods are now public
  */
 class SignedData
 {

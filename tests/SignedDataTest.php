@@ -1,9 +1,12 @@
 <?php
 
-use PetrKnap\Utils\Security\SignedData;
-use PetrKnap\Utils\Security\SignedDataException;
+namespace Netpromotion\DataSigner\Test;
 
-class SignedDataTest extends PHPUnit_Framework_TestCase
+use Netpromotion\DataSigner\SignedData;
+use Netpromotion\DataSigner\SignedDataException;
+use PHPUnit\Framework\TestCase;
+
+class SignedDataTest extends TestCase
 {
     const data = 0x1, saltPrefix = 0x2, saltSuffix = 0x3;
 
@@ -103,6 +106,5 @@ class SignedDataTest extends PHPUnit_Framework_TestCase
             $expectedSize *= 1.66;
             $this->assertLessThanOrEqual($expectedSize + SignedData::SIGNATURE_LENGTH, strlen($sd->SignedData));
         }
-
     }
 }

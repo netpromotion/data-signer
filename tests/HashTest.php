@@ -1,8 +1,11 @@
 <?php
 
-use PetrKnap\Utils\Security\Hash;
+namespace Netpromotion\DataSigner\Test;
 
-class HashTest extends PHPUnit_Framework_TestCase
+use Netpromotion\DataSigner\Hash;
+use PHPUnit\Framework\TestCase;
+
+class HashTest extends TestCase
 {
     private function hash_test($fn, $data, $length)
     {
@@ -110,5 +113,4 @@ class HashTest extends PHPUnit_Framework_TestCase
         $this->assertFalse(strpos($s2, "/"));
         $this->assertFalse(strpos($s2, "="));
     }
-
 }
