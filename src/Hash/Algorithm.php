@@ -1,20 +1,20 @@
 <?php
 
-namespace Netpromotion\DataSigner;
+namespace Netpromotion\DataSigner\Hash;
 
 use PetrKnap\Php\Enum\ConstantsAsMembers;
 use PetrKnap\Php\Enum\Enum;
 
 /**
- * @method static HashAlgorithm CRC32
- * @method static HashAlgorithm MD5
- * @method static HashAlgorithm SHA1
- * @method static HashAlgorithm SHA256
- * @method static HashAlgorithm SHA384
- * @method static HashAlgorithm SHA512
- * @method static HashAlgorithm WHIRLPOOL
+ * @method static Algorithm CRC32
+ * @method static Algorithm MD5
+ * @method static Algorithm SHA1
+ * @method static Algorithm SHA256
+ * @method static Algorithm SHA384
+ * @method static Algorithm SHA512
+ * @method static Algorithm WHIRLPOOL
  */
-class HashAlgorithm extends Enum
+class Algorithm extends Enum
 {
     use ConstantsAsMembers;
 

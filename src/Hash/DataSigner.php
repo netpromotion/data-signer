@@ -1,15 +1,18 @@
 <?php
 
-namespace Netpromotion\DataSigner;
+namespace Netpromotion\DataSigner\Hash;
 
+use Netpromotion\DataSigner\DataSignerInterface;
 use Netpromotion\DataSigner\Exception\CorruptedDataException;
 use Netpromotion\DataSigner\Exception\UntrustedDataException;
+use Netpromotion\DataSigner\SignedDataInterface;
+use Nunzion\Expect;
 use PetrKnap\Php\Enum\Exception\EnumNotFoundException;
 
-class DataSigner
+class DataSigner implements DataSignerInterface
 {
     /**
-     * @var HashAlgorithm
+     * @var Algorithm
      */
     private $hashAlgorithm;
 
@@ -19,43 +22,50 @@ class DataSigner
     private $secret;
 
     /**
-     * @param HashAlgorithm $hashAlgorithm
+     * @param Algorithm $hashAlgorithm
      * @param string $secret
      */
-    public function __construct(HashAlgorithm $hashAlgorithm, $secret)
+    public function __construct(Algorithm $hashAlgorithm, $secret)
     {
+        Expect::that($secret)->isString()->isNotEmpty();
+
         $this->hashAlgorithm = $hashAlgorithm;
         $this->secret = $secret;
     }
 
     /**
      * @internal public for test purpose only
-     * @param HashAlgorithm $hashAlgorithm
+     * @param Algorithm $hashAlgorithm
      * @param string $secret
-     * @param mixed $serializedData
+     * @param string $serializedData
      * @return mixed
      */
-    public static function generateSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData)
+    public static function generateSignature(Algorithm $hashAlgorithm, $secret, $serializedData)
     {
+        Expect::that($secret)->isString()->isNotEmpty();
+        Expect::that($serializedData)->isString()->isNotEmpty();
+
         return hash_hmac($hashAlgorithm, $serializedData, $secret, true);
     }
 
     /**
      * @internal public for test purpose only
-     * @param HashAlgorithm $hashAlgorithm
+     * @param Algorithm $hashAlgorithm
      * @param string $secret
-     * @param mixed $serializedData
+     * @param string $serializedData
      * @param mixed $signature
      * @return bool
      */
-    public static function checkSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData, $signature)
+    public static function checkSignature(Algorithm $hashAlgorithm, $secret, $serializedData, $signature)
     {
+        Expect::that($secret)->isString()->isNotEmpty();
+        Expect::that($serializedData)->isString()->isNotEmpty();
+
         return static::generateSignature($hashAlgorithm, $secret, $serializedData) === $signature;
     }
 
     /**
-     * @param mixed $data
-     * @return SignedData
+     * @inheritdoc
      */
     public function signData($data)
     {
@@ -67,17 +77,16 @@ class DataSigner
     }
 
     /**
-     * @param SignedData|string $signedDataOrSignedDataAsString
-     * @return mixed
-     * @throws CorruptedDataException
-     * @throws UntrustedDataException
+     * @inheritdoc
      */
-    public function getData($signedDataOrSignedDataAsString)
+    public function getData($dataOrDataAsString)
     {
-        if ($signedDataOrSignedDataAsString instanceof SignedData) {
-            $signedDataAsString = $signedDataOrSignedDataAsString->__toString();
+        if ($dataOrDataAsString instanceof SignedDataInterface) {
+            Expect::that($dataOrDataAsString)->isInstanceOf(SignedData::class);
+            $signedDataAsString = json_encode($dataOrDataAsString);
         } else {
-            $signedDataAsString = $signedDataOrSignedDataAsString;
+            Expect::that($dataOrDataAsString)->isString()->isNotEmpty();
+            $signedDataAsString = $dataOrDataAsString;
         }
 
         $decoded = json_decode($signedDataAsString, true, 2);
@@ -91,7 +100,7 @@ class DataSigner
 
         $signature = base64_decode(array_pop($decoded));
         try {
-            $hashAlgorithm = HashAlgorithm::getEnumByValue(array_pop($decoded));
+            $hashAlgorithm = Algorithm::getEnumByValue(array_pop($decoded));
         } catch (EnumNotFoundException $exception) {
             throw new CorruptedDataException('Unknown HashAlgorithm', $exception);
         }
