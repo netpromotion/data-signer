@@ -2,191 +2,121 @@
 
 namespace Netpromotion\DataSigner;
 
-/**
- * Provides methods for signing data
- *
- * All internal methods are covered using getter and setter. Unsigned data set to the property `UnsignedData` and signed data set to the property `SignedData` directly.
- *
- * To determine the credibility of the data, check the property `IsTrusted`.
- *
- * @property mixed UnsignedData Unsigned data
- * @property bool IsTrusted Is it credible?
- * @property string SignedData Signed data
- * @property mixed SaltPrefix Salt for better security (inserted before data)
- * @property mixed SaltSuffix Salt for better security (inserted after data)
- */
-class SignedData
+use Netpromotion\DataSigner\Exception\CorruptedDataException;
+use PetrKnap\Php\Enum\Exception\EnumNotFoundException;
+
+class SignedData implements \JsonSerializable, \Serializable
 {
-
-    private $unsignedData = null;
-    private $isTrusted = null;
-    private $signedData = null;
-    private $saltPrefix;
-    private $saltSuffix;
-
-    public static $ALLOW_UNTRUSTED_DATA = false;
-
-    const SIGNATURE_LENGTH = Hash::B64SHA1length;
+    /**
+     * @var mixed
+     */
+    private $data;
 
     /**
-     * Creates empty instance
-     *
-     * @param mixed $saltPrefix Salt for better security (inserted before data)
-     * @param mixed $saltSuffix Salt for better security (inserted after data)
+     * @var HashAlgorithm
      */
-    public function __construct($saltPrefix = null, $saltSuffix = null)
+    private $algorithm;
+
+    /**
+     * @var mixed
+     */
+    private $signature;
+
+    /**
+     * @param mixed $data
+     * @param HashAlgorithm $algorithm
+     * @param mixed $signature
+     */
+    public function __construct($data, HashAlgorithm $algorithm, $signature)
     {
-        $this->setSaltPrefix($saltPrefix);
-        $this->setSaltSuffix($saltSuffix);
+        $this->data = $data;
+        $this->algorithm = $algorithm;
+        $this->signature = $signature;
     }
 
     /**
-     * Returns property value by name
-     *
-     * @param string $name Property name
-     * @return mixed Property value
-     * @throws \Exception If couldn't find property.
+     * @return mixed
      */
-    public function __get($name)
+    public function getData()
     {
-        switch ($name) {
-            case "UnsignedData":
-                return $this->getUnsignedData();
-            case "SignedData":
-                return $this->signedData;
-            case "SaltPrefix":
-                return $this->saltPrefix;
-            case "SaltSuffix":
-                return $this->saltSuffix;
-            case "IsTrusted":
-                return $this->isTrusted;
-            default:
-                throw new SignedDataException("Variable $" . $name . " not found.");
-                break;
-        }
+        return $this->data;
     }
 
     /**
-     * Sets property value by name
-     *
-     * @param string $name Property name
-     * @param mixed $value Property value
-     * @throws \Exception If couldn't access property.
+     * @return HashAlgorithm
      */
-    public function __set($name, $value)
+    public function getAlgorithm()
     {
-        switch ($name) {
-            case "UnsignedData":
-                $this->setUnsignedData($value);
-                break;
-            case "SignedData":
-                $this->setSignedData($value);
-                break;
-            case "SaltPrefix":
-                $this->setSaltPrefix($value);
-                break;
-            case "SaltSuffix":
-                $this->setSaltSuffix($value);
-                break;
-            case "IsTrusted":
-                throw new SignedDataException("Variable $" . $name . " is readonly.");
-                break;
-            default:
-                throw new SignedDataException("Variable $" . $name . " not found.");
-                break;
-        }
+        return $this->algorithm;
     }
 
     /**
-     * Gets unsigned data
-     *
-     * @throws SignedDataException
-     * @return mixed Deserialized unsigned data
+     * @return mixed
      */
-    private function getUnsignedData()
+    public function getSignature()
     {
+        return $this->signature;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function jsonSerialize()
+    {
+        return [
+            serialize($this->data),
+            $this->algorithm->getValue(),
+            base64_encode($this->signature),
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function serialize()
+    {
+        return json_encode($this);
+    }
+
+    /**
+     * @inheritdoc
+     * @throws CorruptedDataException
+     */
+    public function unserialize($serialized)
+    {
+        $data = json_decode($serialized, true);
+
         try {
-            return unserialize($this->unsignedData);
-        } catch (\Exception $e) {
-            throw new SignedDataException($e->getMessage(), SignedDataException::InvalidDataException, $e);
+            $this->data = unserialize($data[0]);
+            $this->algorithm = HashAlgorithm::getEnumByValue($data[1]);
+            $this->signature = base64_decode($data[2]);
+
+            if (false === $this->signature) {
+                throw new CorruptedDataException(sprintf('Wrong signature: "%s"', $data[2]));
+            }
+        } catch (EnumNotFoundException $exception) {
+            throw new CorruptedDataException('Unknown hash algorithm', $exception);
         }
     }
 
     /**
-     * Sets unsigned data
-     *
-     * This method automatically generates signed data.
-     *
-     * @param mixed $unsignedData Unsigned data
-     * @return string Signed data
+     * @inheritdoc
      */
-    private function setUnsignedData($unsignedData)
+    public function __toString()
     {
-        $unsignedData = serialize($unsignedData);
-        $this->unsignedData = $unsignedData;
-        $unsignedData = base64_encode($unsignedData);
-        $this->signedData = Hash::B64SHA1(
-                base64_encode($this->saltPrefix) .
-                $unsignedData .
-                base64_encode($this->saltSuffix)
-            ) . $unsignedData;
-        $this->isTrusted = true;
-        return $this->SignedData;
+        return $this->serialize();
     }
 
     /**
-     * Sets signed data
-     *
-     * This method automatically checks data, sets `IsTrusted` property and extract signed data.
-     * than returns unsigned data
-     *
-     * @param string $signedData Signed data as Base64 string
-     * @return mixed Unsigned data (if data is credible, otherwise `null`)
+     * @param string $string
+     * @return SignedData
+     * @throws CorruptedDataException
      */
-    private function setSignedData($signedData)
+    public static function fromString($string)
     {
-        $this->signedData = $signedData;
-        $this->unsignedData = substr($signedData, self::SIGNATURE_LENGTH);
-        $this->unsignedData = base64_decode($this->unsignedData);
-        $this->isTrusted = $this->check();
-        return $this->IsTrusted ? $this->UnsignedData : null;
-    }
+        $signedData = new SignedData('', HashAlgorithm::MD5(), 0b0);
+        $signedData->unserialize($string);
 
-    /**
-     * Sets salt (prefix)
-     *
-     * @param mixed $saltPrefix Salt for better security (inserted before data)
-     */
-    private function setSaltPrefix($saltPrefix)
-    {
-        $this->saltPrefix = $saltPrefix;
+        return $signedData;
     }
-
-    /**
-     * Sets salt (suffix)
-     *
-     * @param mixed $saltSuffix Salt for better security (inserted after data)
-     */
-    private function setSaltSuffix($saltSuffix)
-    {
-        $this->saltSuffix = $saltSuffix;
-    }
-
-    /**
-     * Checks credibility
-     *
-     * @throws SignedDataException
-     * @return bool `True` if data is credible, otherwise `false`
-     */
-    private function check()
-    {
-        $new = new SignedData($this->SaltPrefix, $this->SaltSuffix);
-        $new->setUnsignedData($this->UnsignedData);
-        $isTrusted = ($new->SignedData == $this->SignedData);
-        if (!$isTrusted && !self::$ALLOW_UNTRUSTED_DATA) {
-            throw new SignedDataException("Untrusted data", SignedDataException::UntrustedDataException);
-        }
-        return $isTrusted;
-    }
-
 }

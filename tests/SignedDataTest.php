@@ -1,110 +1,39 @@
 <?php
 
-namespace Netpromotion\DataSigner\Test;
+namespace Netpromotion\Test\DataSigner;
 
+use Netpromotion\DataSigner\HashAlgorithm;
 use Netpromotion\DataSigner\SignedData;
-use Netpromotion\DataSigner\SignedDataException;
-use PHPUnit\Framework\TestCase;
 
-class SignedDataTest extends TestCase
+class SignedDataTest extends \PHPUnit_Framework_TestCase
 {
-    const data = 0x1, saltPrefix = 0x2, saltSuffix = 0x3;
-
-    private function signedData_test($data, $saltPrefix, $saltSuffix)
+    private function getSignedDataAsObject()
     {
-        SignedData::$ALLOW_UNTRUSTED_DATA = false;
-
-        $A = new SignedData($saltPrefix, $saltSuffix);
-        $A->UnsignedData = $data;
-
-        // All is OK
-        $B = new SignedData($saltPrefix, $saltSuffix);
-        $B->SignedData = $A->SignedData;
-
-        $this->assertTrue($B->IsTrusted);
-        $this->assertEquals($data, $B->UnsignedData);
-
-        // Invalid salt
-        $C = new SignedData($saltSuffix, $saltPrefix);
-        try {
-            $C->SignedData = $A->SignedData;
-            if($saltPrefix != $saltSuffix) {
-                $this->fail("Invalid salt doesn't throw exception.");
-            }
-            else {
-                $this->assertTrue($C->IsTrusted);
-                $this->assertEquals($data, $C->UnsignedData);
-            }
-        } catch(SignedDataException $sde) {
-            $this->assertEquals(SignedDataException::UntrustedDataException, $sde->getCode());
-        }
-
-        // Invalid data
-        $D = new SignedData($saltPrefix, $saltSuffix);
-        try {
-            $lastChar = substr($A->SignedData, -1, 1);
-            $D->SignedData = substr($A->SignedData, 0, -1) . $lastChar == "a" ? "b" : "a";
-            $this->fail("Invalid data doesn't throw exception.");
-        } catch(SignedDataException $sde) {
-            $this->assertEquals(SignedDataException::UntrustedDataException, $sde->getCode());
-        }
-
-        // Invalid signature
-        $E = new SignedData($saltPrefix, $saltSuffix);
-        try {
-            $firstChar = substr($A->SignedData, 0, 1);
-            $E->SignedData = $firstChar == "a" ? "b" : "a" . substr($A->SignedData, 1);
-            $this->fail("Invalid signature doesn't throw exception.");
-        } catch(SignedDataException $sde) {
-            $this->assertEquals(SignedDataException::UntrustedDataException, $sde->getCode());
-        }
-
+        return new SignedData('data', HashAlgorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='));
     }
 
-    public function test_simple() {
-        $this->signedData_test(self::data, self::saltPrefix, self::saltSuffix);
+    private function getSignatureDataAsJsonString()
+    {
+        return "[\"s:4:\\\"data\\\";\",\"md5\",\"7TJ3nATVM5bTQ9Zg6Ie\/sg==\"]";
     }
 
-    public function test_mixedData() {
-        $data = array(
-            "string",
-            array("array"),
-            array("ar" => "ray"),
-            0x1234567890abcdef,
-            012345670,
-            0b10,
-            new SignedData(self::saltPrefix, self::saltSuffix),
-            null
-        );
-        foreach($data as $d) {
-            $this->signedData_test($d, self::saltPrefix, self::saltSuffix);
-        }
+    private function getSignedDataAsString()
+    {
+        return "C:34:\"Netpromotion\DataSigner\SignedData\":51:{[\"s:4:\\\"data\\\";\",\"md5\",\"7TJ3nATVM5bTQ9Zg6Ie\/sg==\"]}";
     }
 
-    public function test_mixedSalt() {
-        $salt = array(
-            "string",
-            0x1234567890abcdef,
-            012345670,
-            0b10,
-            null,
-        );
-        foreach($salt as $a) {
-            foreach($salt as $b) {
-                $this->signedData_test(self::data, $a, $b);
-            }
-        }
+    public function testSerializationWorks()
+    {
+        $this->assertSame($this->getSignedDataAsString(), serialize($this->getSignedDataAsObject()));
     }
 
-    public function test_outputSize() {
-        $sd = new SignedData();
+    public function testDeserializationWorks()
+    {
+        $this->assertEquals($this->getSignedDataAsObject(), unserialize($this->getSignedDataAsString()));
+    }
 
-        for($i = 0, $data = "string"; $i < 10; $i++, $data .= $data) {
-            $sd->UnsignedData = $data;
-            $expectedSize = strlen($data);
-            $expectedSize = $expectedSize > SignedData::SIGNATURE_LENGTH ? $expectedSize : SignedData::SIGNATURE_LENGTH;
-            $expectedSize *= 1.66;
-            $this->assertLessThanOrEqual($expectedSize + SignedData::SIGNATURE_LENGTH, strlen($sd->SignedData));
-        }
+    public function testJsonSerializationWorks()
+    {
+        $this->assertSame($this->getSignatureDataAsJsonString(), json_encode($this->getSignedDataAsObject()));
     }
 }
