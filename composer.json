@@ -1,37 +1,26 @@
 {
-    "name": "petrknap/utils",
-    "description": "Useful PHP utils by Petr Knap",
+    "name": "netpromotion/data-signer",
+    "description": "Data Signer for PHP",
     "license": "MIT",
     "authors": [
         {
             "name": "Petr Knap",
-            "email": "dev@petrknap.cz",
-            "homepage": "http://petrknap.cz",
-            "role": "Developer"
+            "email": "knap@netpromotion.cz"
+        },
+        {
+            "name": "Filip Halaxa",
+            "email": "halaxa@netpromotion.cz"
         }
     ],
-    "config": {
-        "preferred-install": "dist"
-    },
     "require": {
-        "php": ">=5.4",
-        "petrknap/php-image": "0.9",
-        "petrknap/php-singleton": "0.1.*"
+        "php": ">=5.6"
     },
     "require-dev": {
-        "phpunit/phpunit": ">=4.0"
-    },
-    "scripts": {
-        "test": [
-            "./vendor/bin/phpunit"
-        ],
-        "post-autoload-dump": [
-            "@test"
-        ]
+        "phpunit/phpunit": "^5.7"
     },
     "autoload": {
         "psr-4": {
-            "PetrKnap\\Utils\\": "src/"
+            "PetrKnap\\Utils\\Security\\": "src/"
         }
     }
 }
