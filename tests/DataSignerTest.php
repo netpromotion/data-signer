@@ -8,8 +8,9 @@ use Netpromotion\DataSigner\Exception\UntrustedDataException;
 use Netpromotion\DataSigner\HashAlgorithm;
 use Netpromotion\DataSigner\SignedData;
 use PetrKnap\Php\Enum\Exception\EnumNotFoundException;
+use PHPUnit\Framework\TestCase;
 
-class DataSignerTest extends \PHPUnit_Framework_TestCase
+class DataSignerTest extends TestCase
 {
     const DATA = 'data';
     const SERIALIZED_DATA = 's:4:"data";';
@@ -81,6 +82,8 @@ class DataSignerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider dataSignsData
+     * @param mixed $data
+     * @param string $expectedSignature
      * @throws EnumNotFoundException
      */
     public function testSignsData($data, $expectedSignature)

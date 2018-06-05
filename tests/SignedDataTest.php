@@ -4,8 +4,9 @@ namespace Netpromotion\Test\DataSigner;
 
 use Netpromotion\DataSigner\HashAlgorithm;
 use Netpromotion\DataSigner\SignedData;
+use PHPUnit\Framework\TestCase;
 
-class SignedDataTest extends \PHPUnit_Framework_TestCase
+class SignedDataTest extends TestCase
 {
     private function getSignedDataAsObject()
     {

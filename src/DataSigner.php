@@ -67,7 +67,7 @@ class DataSigner
     }
 
     /**
-     * @param SignedData|string $signedDataAsString
+     * @param SignedData|string $signedDataOrSignedDataAsString
      * @return mixed
      * @throws CorruptedDataException
      * @throws UntrustedDataException
