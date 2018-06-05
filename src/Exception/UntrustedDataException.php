@@ -5,28 +5,26 @@ namespace Netpromotion\DataSigner\Exception;
 class UntrustedDataException extends DataSignerException
 {
     /**
-     * @var mixed
+     * @var string
      */
-    private $data;
+    private $serializedData;
 
     /**
-     * @param mixed $data
-     * @param string $message
-     * @param int $code
+     * @param string $serializedData
      * @param null $previous
      */
-    public function __construct($data, $previous = null)
+    public function __construct($serializedData, $previous = null)
     {
         parent::__construct('', 0, $previous);
 
-        $this->data = $data;
+        $this->serializedData = $serializedData;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getData()
+    public function getSerializedData()
     {
-        return $this->data;
+        return $this->serializedData;
     }
 }

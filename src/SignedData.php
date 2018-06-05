@@ -106,17 +106,4 @@ class SignedData implements \JsonSerializable, \Serializable
     {
         return $this->serialize();
     }
-
-    /**
-     * @param string $string
-     * @return SignedData
-     * @throws CorruptedDataException
-     */
-    public static function fromString($string)
-    {
-        $signedData = new SignedData('', HashAlgorithm::MD5(), 0b0);
-        $signedData->unserialize($string);
-
-        return $signedData;
-    }
 }

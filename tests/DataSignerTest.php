@@ -3,13 +3,16 @@
 namespace Netpromotion\Test\DataSigner;
 
 use Netpromotion\DataSigner\DataSigner;
+use Netpromotion\DataSigner\Exception\CorruptedDataException;
 use Netpromotion\DataSigner\Exception\UntrustedDataException;
 use Netpromotion\DataSigner\HashAlgorithm;
 use Netpromotion\DataSigner\SignedData;
+use PetrKnap\Php\Enum\Exception\EnumNotFoundException;
 
 class DataSignerTest extends \PHPUnit_Framework_TestCase
 {
     const DATA = 'data';
+    const SERIALIZED_DATA = 's:4:"data";';
     const SECRET = 'secret';
     const ALGORITHM = HashAlgorithm::MD5;
     const B64_SIGNATURE = '7TJ3nATVM5bTQ9Zg6Ie/sg==';
@@ -26,41 +29,30 @@ class DataSignerTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider dataGeneratesCorrectSignatures
      * @param HashAlgorithm $hashAlgorithm
-     * @param mixed $data
      * @param string $expectedSignature
      */
-    public function testGeneratesCorrectSignatures(HashAlgorithm $hashAlgorithm, $data, $expectedSignature)
+    public function testGeneratesCorrectSignatures(HashAlgorithm $hashAlgorithm, $expectedSignature)
     {
         $this->assertSame($expectedSignature, base64_encode(DataSigner::generateSignature(
-            $hashAlgorithm, static::SECRET, $data
+            $hashAlgorithm, static::SECRET, self::SERIALIZED_DATA
         )));
         $this->assertNotSame(base64_encode(DataSigner::generateSignature(
-            $hashAlgorithm, static::SECRET, $data
+            $hashAlgorithm, static::SECRET, self::SERIALIZED_DATA
         )), base64_encode(DataSigner::generateSignature(
-            $hashAlgorithm, 'different secret', $data
+            $hashAlgorithm, 'different secret', self::SERIALIZED_DATA
         )));
     }
 
     public function dataGeneratesCorrectSignatures()
     {
-        /** @noinspection PhpUndefinedMethodInspection */
         return [
-            // Different data
-            [HashAlgorithm::MD5(), null, 'IeV2LaJR49V6Gc/tEHMunA=='],
-            [HashAlgorithm::MD5(), true, 'K/rkl/njSIRfpnhDc5Pihw=='],
-            [HashAlgorithm::MD5(), false, 'w65f72+kR4IrW36oHpV9GA=='],
-            [HashAlgorithm::MD5(), 123, 'zBAsOYHoeRikD0k8IvnhWA=='],
-            [HashAlgorithm::MD5(), 1.2, 'nOQlhHalAAc29fSk2HNpYA=='],
-            [HashAlgorithm::MD5(), [1,2], 'i3xbgkKBJZCPbGvFIxO05A=='],
-            [HashAlgorithm::MD5(), 'string', '56E6w44xFqiUmE6twu8e+A=='],
-            [HashAlgorithm::MD5(), new \stdClass(), 'Vr7lCYZJKRe6JM1LSFh4lQ=='],
-            // Different algorithms
-            [HashAlgorithm::SHA1(), '', 'XD+VGNBrMTz7RibfIAn+icyVDr0='],
-            [HashAlgorithm::SHA256(), '', '79nnfiu+oOz5L8vBntu+QtxEU4hk4HFaQiWuKaGkidM='],
-            [HashAlgorithm::SHA384(), '', 's8sfF9TUaNxe5aFRc3y8c3SfwlKCCClAyE+G3hBetcHXnh4lVESdq/L0JKmpyYGt'],
-            [HashAlgorithm::SHA512(), '', 'Y4K9erMW62MV36W5RhFD7iIJn2V+rAthjNnqiGz+XVx8M+5qBAHNNYt73hGWtGnDym8aRjSgbSiRlC1FwbyKsg=='],
-            [HashAlgorithm::WHIRLPOOL(), '', 'rdOL3cqJpYYbkKK3FZhlIGdL2v3NgQJXly4Sj9C33RBam4DX6yMvqGQFYP0A15FlcxGch/00wk0d7CltYQUn9g=='],
-            [HashAlgorithm::CRC32(), '', 'U3iGng=='],
+            [HashAlgorithm::MD5(), '7TJ3nATVM5bTQ9Zg6Ie/sg=='],
+            [HashAlgorithm::SHA1(), 'rZhsdKv1/VVFRRLMMjXqbBMzvFY='],
+            [HashAlgorithm::SHA256(), 'dlDY5cb2myAVOBi7EWPr5fAnGpIgywPdX3cA8boXsos='],
+            [HashAlgorithm::SHA384(), 'iKvKxN6l/tt4t5QOmN826873vyyUYNpREBBL+V/W9PObaYuIJ/gve0cM7MTfTVt8'],
+            [HashAlgorithm::SHA512(), 'LC91vK9wCvFsvgmWXrOTjRsuz0OwEutALU+iG+PrOF+M580h5GXy4eIHAgDH+7wTStiWOXnr+PFyRmut3koShw=='],
+            [HashAlgorithm::WHIRLPOOL(), 'CuQ0i2+3m6wwmDzp/qrRAzc+K/FjA6SLSxWaYnxwswGRwvb8OZ+NGWMQLhI8EnLtzHKBK31tC8cw2eIA/RqwEQ=='],
+            [HashAlgorithm::CRC32(), 'JCVcbQ=='],
         ];
     }
 
@@ -68,12 +60,13 @@ class DataSignerTest extends \PHPUnit_Framework_TestCase
      * @dataProvider dataCheckSignatureWorks
      * @param string $signature
      * @param bool $expected
+     * @throws EnumNotFoundException
      */
     public function testCheckSignatureWorks($signature, $expected)
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->assertSame($expected, DataSigner::checkSignature(
-            HashAlgorithm::getEnumByValue(static::ALGORITHM), static::SECRET, static::DATA, base64_decode($signature)
+            HashAlgorithm::getEnumByValue(static::ALGORITHM), static::SECRET, static::SERIALIZED_DATA, base64_decode($signature)
         ));
     }
 
@@ -86,47 +79,105 @@ class DataSignerTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testSignsData()
+    /**
+     * @dataProvider dataSignsData
+     * @throws EnumNotFoundException
+     */
+    public function testSignsData($data, $expectedSignature)
     {
-        $signedData = $this->getDataSigner()->signData(static::DATA);
+        $signedData = $this->getDataSigner()->signData($data);
 
         $this->assertInstanceOf(SignedData::class, $signedData);
-        $this->assertSame(static::DATA, $signedData->getData());
-        /** @noinspection PhpUnhandledExceptionInspection */
+        $this->assertSame($data, $signedData->getData());
         $this->assertSame(HashAlgorithm::getEnumByValue(static::ALGORITHM), $signedData->getAlgorithm());
-        $this->assertSame(static::B64_SIGNATURE, base64_encode($signedData->getSignature()));
+        $this->assertSame($expectedSignature, base64_encode($signedData->getSignature()));
     }
 
-    public function testGetDataReturnsTrustedData()
+    public function dataSignsData()
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $this->assertSame(static::DATA, $this->getDataSigner()->getData(new SignedData(
+        return [
+            [null, 'IeV2LaJR49V6Gc/tEHMunA=='],
+            [true, 'K/rkl/njSIRfpnhDc5Pihw=='],
+            [false, 'w65f72+kR4IrW36oHpV9GA=='],
+            [123, 'zBAsOYHoeRikD0k8IvnhWA=='],
+            [1.2, 'nOQlhHalAAc29fSk2HNpYA=='],
+            [[1,2], 'i3xbgkKBJZCPbGvFIxO05A=='],
+            ['string', '56E6w44xFqiUmE6twu8e+A=='],
+            [new \stdClass(), 'Vr7lCYZJKRe6JM1LSFh4lQ=='],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetDataReturnsTrustedData
+     * @param mixed $signedData
+     * @throws CorruptedDataException
+     * @throws UntrustedDataException
+     */
+    public function testGetDataReturnsTrustedData($signedData)
+    {
+        $this->assertSame(static::DATA, $this->getDataSigner()->getData($signedData));
+    }
+
+    /**
+     * @throws EnumNotFoundException
+     */
+    public function dataGetDataReturnsTrustedData()
+    {
+        $signedData = new SignedData(
             static::DATA,
             HashAlgorithm::getEnumByValue(static::ALGORITHM),
             base64_decode(static::B64_SIGNATURE)
-        )));
+        );
+
+        return [
+            [$signedData],
+            [$signedData->__toString()],
+        ];
     }
 
-    public function testGetDataThrowsOnUntrustedData()
+    /**
+     * @dataProvider dataGetDataThrowsOnUntrustedData
+     * @param mixed $signedData
+     * @throws CorruptedDataException
+     * @throws UntrustedDataException
+     */
+    public function testGetDataThrowsOnUntrustedData($signedData)
     {
         $this->expectException(UntrustedDataException::class);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $this->getDataSigner()->getData(new SignedData(
+        $this->getDataSigner()->getData($signedData);
+    }
+
+    /**
+     * @throws EnumNotFoundException
+     */
+    public function dataGetDataThrowsOnUntrustedData()
+    {
+        $signedData = new SignedData(
             static::DATA,
             HashAlgorithm::getEnumByValue(static::ALGORITHM),
             base64_decode('IeV2LaJR49V6Gc/tEHMunA==')
-        ));
+        );
+
+        return [
+            [$signedData],
+            [$signedData->__toString()],
+        ];
     }
 
-    public function testUntrustedDataExceptionContainsData()
+    /**
+     * @dataProvider dataGetDataThrowsOnUntrustedData
+     * @param mixed $signedData
+     * @throws CorruptedDataException
+     * @throws UntrustedDataException
+     */
+    public function testUntrustedDataExceptionContainsSerializedData($signedData)
     {
         try {
-            $this->testGetDataThrowsOnUntrustedData();
+            $this->testGetDataThrowsOnUntrustedData($signedData);
         } catch (UntrustedDataException $exception) {
-            $this->assertSame(static::DATA, $exception->getData());
+            $this->assertSame(static::SERIALIZED_DATA, $exception->getSerializedData());
 
-            /** @noinspection PhpUnhandledExceptionInspection */
             throw $exception;
         }
     }
