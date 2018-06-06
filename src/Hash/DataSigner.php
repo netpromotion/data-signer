@@ -98,13 +98,13 @@ class DataSigner implements DataSignerInterface
             ));
         }
 
-        $signature = base64_decode(array_pop($decoded));
+        $serializedData = $decoded[SignedData::JSON_SERIALIZED_DATA];
         try {
-            $hashAlgorithm = Algorithm::getEnumByValue(array_pop($decoded));
+            $hashAlgorithm = Algorithm::getEnumByValue($decoded[SignedData::JSON_ALGORITHM]);
         } catch (EnumNotFoundException $exception) {
             throw new CorruptedDataException('Unknown HashAlgorithm', $exception);
         }
-        $serializedData = array_pop($decoded);
+        $signature = base64_decode($decoded[SignedData::JSON_B64_SIGNATURE]);
 
         if (!static::checkSignature($hashAlgorithm, $this->secret, $serializedData, $signature)) {
             throw new UntrustedDataException($serializedData);

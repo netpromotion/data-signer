@@ -6,6 +6,10 @@ use Netpromotion\DataSigner\SignedDataInterface;
 
 class SignedData implements SignedDataInterface
 {
+    const JSON_SERIALIZED_DATA = 'd';
+    const JSON_ALGORITHM = 'a';
+    const JSON_B64_SIGNATURE = 's';
+
     /**
      * @var mixed
      */
@@ -63,9 +67,9 @@ class SignedData implements SignedDataInterface
     public function jsonSerialize()
     {
         return [
-            serialize($this->data),
-            $this->algorithm->getValue(),
-            base64_encode($this->signature),
+            static::JSON_SERIALIZED_DATA => serialize($this->data),
+            static::JSON_ALGORITHM => $this->algorithm->getValue(),
+            static::JSON_B64_SIGNATURE => base64_encode($this->signature),
         ];
     }
 
