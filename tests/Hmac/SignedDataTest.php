@@ -8,18 +8,29 @@ use PHPUnit\Framework\TestCase;
 
 class SignedDataTest extends TestCase
 {
-    private function getSignedDataAsObject()
+    private function getImmortalSignedDataAsObject()
     {
         return new SignedData('data', HashAlgorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='));
     }
 
-    private function getSignatureDataAsJsonString()
+    private function getImmortalSignatureDataAsJsonString()
     {
         return "[\"s:4:\\\"data\\\";\",\"md5\",\"7TJ3nATVM5bTQ9Zg6Ie\/sg==\"]";
     }
 
+    private function getMortalSignedDataAsObject()
+    {
+        return new SignedData('data', Algorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='), 123);
+    }
+
+    private function getMortalSignatureDataAsJsonString()
+    {
+        return "[\"s:4:\\\"data\\\";\",\"md5\",\"7TJ3nATVM5bTQ9Zg6Ie\/sg==\",123]";
+    }
+
     public function testJsonSerializationWorks()
     {
-        $this->assertSame($this->getSignatureDataAsJsonString(), json_encode($this->getSignedDataAsObject()));
+        $this->assertSame($this->getImmortalSignatureDataAsJsonString(), json_encode($this->getImmortalSignedDataAsObject()));
+        $this->assertSame($this->getMortalSignatureDataAsJsonString(), json_encode($this->getMortalSignedDataAsObject()));
     }
 }
