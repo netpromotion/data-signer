@@ -6,9 +6,9 @@ use Netpromotion\DataSigner\SignedDataInterface;
 
 class SignedData implements SignedDataInterface
 {
-    const JSON_SERIALIZED_DATA = 'd';
-    const JSON_ALGORITHM = 'a';
-    const JSON_B64_SIGNATURE = 's';
+    const JSON_SERIALIZED_DATA = 0;
+    const JSON_ALGORITHM = 1;
+    const JSON_B64_SIGNATURE = 2;
 
     /**
      * @var mixed

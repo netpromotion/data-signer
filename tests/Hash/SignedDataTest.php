@@ -15,7 +15,7 @@ class SignedDataTest extends TestCase
 
     private function getSignatureDataAsJsonString()
     {
-        return "{\"d\":\"s:4:\\\"data\\\";\",\"a\":\"md5\",\"s\":\"7TJ3nATVM5bTQ9Zg6Ie\/sg==\"}";
+        return "[\"s:4:\\\"data\\\";\",\"md5\",\"7TJ3nATVM5bTQ9Zg6Ie\/sg==\"]";
     }
 
     public function testJsonSerializationWorks()
