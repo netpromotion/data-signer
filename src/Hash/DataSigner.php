@@ -58,8 +58,7 @@ class DataSigner implements DataSignerInterface
      */
     public static function checkSignature(Algorithm $hashAlgorithm, $secret, $serializedData, $signature)
     {
-        Expect::that($secret)->isString()->isNotEmpty();
-        Expect::that($serializedData)->isString()->isNotEmpty();
+        Expect::that($signature)->isNotNull();
 
         return static::generateSignature($hashAlgorithm, $secret, $serializedData) === $signature;
     }
