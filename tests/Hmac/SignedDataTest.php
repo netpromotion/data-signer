@@ -1,16 +1,16 @@
 <?php
 
-namespace Netpromotion\Test\DataSigner\Hash;
+namespace Netpromotion\Test\DataSigner\Hmac;
 
-use Netpromotion\DataSigner\Hash\Algorithm;
-use Netpromotion\DataSigner\Hash\SignedData;
+use Netpromotion\DataSigner\Hmac\HashAlgorithm;
+use Netpromotion\DataSigner\Hmac\SignedData;
 use PHPUnit\Framework\TestCase;
 
 class SignedDataTest extends TestCase
 {
     private function getSignedDataAsObject()
     {
-        return new SignedData('data', Algorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='));
+        return new SignedData('data', HashAlgorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='));
     }
 
     private function getSignatureDataAsJsonString()

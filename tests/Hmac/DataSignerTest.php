@@ -1,12 +1,12 @@
 <?php
 
-namespace Netpromotion\Test\DataSigner\Hash;
+namespace Netpromotion\Test\DataSigner\Hmac;
 
 use Netpromotion\DataSigner\Exception\CorruptedDataException;
 use Netpromotion\DataSigner\Exception\UntrustedDataException;
-use Netpromotion\DataSigner\Hash\DataSigner;
-use Netpromotion\DataSigner\Hash\Algorithm;
-use Netpromotion\DataSigner\Hash\SignedData;
+use Netpromotion\DataSigner\Hmac\DataSigner;
+use Netpromotion\DataSigner\Hmac\HashAlgorithm;
+use Netpromotion\DataSigner\Hmac\SignedData;
 use PetrKnap\Php\Enum\Exception\EnumNotFoundException;
 use PHPUnit\Framework\TestCase;
 
@@ -15,24 +15,24 @@ class DataSignerTest extends TestCase
     const DATA = 'data';
     const SERIALIZED_DATA = 's:4:"data";';
     const SECRET = 'secret';
-    const ALGORITHM = Algorithm::MD5;
+    const ALGORITHM = 'md5';
     const B64_SIGNATURE = '7TJ3nATVM5bTQ9Zg6Ie/sg==';
 
     private function getDataSigner()
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         return new DataSigner(
-            Algorithm::getEnumByValue(static::ALGORITHM),
+            HashAlgorithm::getEnumByValue(static::ALGORITHM),
             static::SECRET
         );
     }
 
     /**
      * @dataProvider dataGeneratesCorrectSignatures
-     * @param Algorithm $hashAlgorithm
+     * @param HashAlgorithm $hashAlgorithm
      * @param string $expectedSignature
      */
-    public function testGeneratesCorrectSignatures(Algorithm $hashAlgorithm, $expectedSignature)
+    public function testGeneratesCorrectSignatures(HashAlgorithm $hashAlgorithm, $expectedSignature)
     {
         $this->assertSame($expectedSignature, base64_encode(DataSigner::generateSignature(
             $hashAlgorithm, static::SECRET, self::SERIALIZED_DATA
@@ -47,13 +47,13 @@ class DataSignerTest extends TestCase
     public function dataGeneratesCorrectSignatures()
     {
         return [
-            [Algorithm::MD5(), '7TJ3nATVM5bTQ9Zg6Ie/sg=='],
-            [Algorithm::SHA1(), 'rZhsdKv1/VVFRRLMMjXqbBMzvFY='],
-            [Algorithm::SHA256(), 'dlDY5cb2myAVOBi7EWPr5fAnGpIgywPdX3cA8boXsos='],
-            [Algorithm::SHA384(), 'iKvKxN6l/tt4t5QOmN826873vyyUYNpREBBL+V/W9PObaYuIJ/gve0cM7MTfTVt8'],
-            [Algorithm::SHA512(), 'LC91vK9wCvFsvgmWXrOTjRsuz0OwEutALU+iG+PrOF+M580h5GXy4eIHAgDH+7wTStiWOXnr+PFyRmut3koShw=='],
-            [Algorithm::WHIRLPOOL(), 'CuQ0i2+3m6wwmDzp/qrRAzc+K/FjA6SLSxWaYnxwswGRwvb8OZ+NGWMQLhI8EnLtzHKBK31tC8cw2eIA/RqwEQ=='],
-            [Algorithm::CRC32(), 'JCVcbQ=='],
+            [HashAlgorithm::MD5(), '7TJ3nATVM5bTQ9Zg6Ie/sg=='],
+            [HashAlgorithm::SHA1(), 'rZhsdKv1/VVFRRLMMjXqbBMzvFY='],
+            [HashAlgorithm::SHA256(), 'dlDY5cb2myAVOBi7EWPr5fAnGpIgywPdX3cA8boXsos='],
+            [HashAlgorithm::SHA384(), 'iKvKxN6l/tt4t5QOmN826873vyyUYNpREBBL+V/W9PObaYuIJ/gve0cM7MTfTVt8'],
+            [HashAlgorithm::SHA512(), 'LC91vK9wCvFsvgmWXrOTjRsuz0OwEutALU+iG+PrOF+M580h5GXy4eIHAgDH+7wTStiWOXnr+PFyRmut3koShw=='],
+            [HashAlgorithm::WHIRLPOOL(), 'CuQ0i2+3m6wwmDzp/qrRAzc+K/FjA6SLSxWaYnxwswGRwvb8OZ+NGWMQLhI8EnLtzHKBK31tC8cw2eIA/RqwEQ=='],
+            [HashAlgorithm::CRC32(), 'JCVcbQ=='],
         ];
     }
 
@@ -67,7 +67,7 @@ class DataSignerTest extends TestCase
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->assertSame($expected, DataSigner::checkSignature(
-            Algorithm::getEnumByValue(static::ALGORITHM), static::SECRET, static::SERIALIZED_DATA, base64_decode($signature)
+            HashAlgorithm::getEnumByValue(static::ALGORITHM), static::SECRET, static::SERIALIZED_DATA, base64_decode($signature)
         ));
     }
 
@@ -92,7 +92,7 @@ class DataSignerTest extends TestCase
 
         $this->assertInstanceOf(SignedData::class, $signedData);
         $this->assertSame($data, $signedData->getData());
-        $this->assertSame(Algorithm::getEnumByValue(static::ALGORITHM), $signedData->getAlgorithm());
+        $this->assertSame(HashAlgorithm::getEnumByValue(static::ALGORITHM), $signedData->getAlgorithm());
         $this->assertSame($expectedSignature, base64_encode($signedData->getSignature()));
     }
 
@@ -128,7 +128,7 @@ class DataSignerTest extends TestCase
     {
         $signedData = new SignedData(
             static::DATA,
-            Algorithm::getEnumByValue(static::ALGORITHM),
+            HashAlgorithm::getEnumByValue(static::ALGORITHM),
             base64_decode(static::B64_SIGNATURE)
         );
 
@@ -158,7 +158,7 @@ class DataSignerTest extends TestCase
     {
         $signedData = new SignedData(
             static::DATA,
-            Algorithm::getEnumByValue(static::ALGORITHM),
+            HashAlgorithm::getEnumByValue(static::ALGORITHM),
             base64_decode('IeV2LaJR49V6Gc/tEHMunA==')
         );
 

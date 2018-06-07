@@ -1,6 +1,6 @@
 <?php
 
-namespace Netpromotion\DataSigner\Hash;
+namespace Netpromotion\DataSigner\Hmac;
 
 use Netpromotion\DataSigner\DataSignerInterface;
 use Netpromotion\DataSigner\Exception\CorruptedDataException;
@@ -12,7 +12,7 @@ use PetrKnap\Php\Enum\Exception\EnumNotFoundException;
 class DataSigner implements DataSignerInterface
 {
     /**
-     * @var Algorithm
+     * @var HashAlgorithm
      */
     private $hashAlgorithm;
 
@@ -22,10 +22,10 @@ class DataSigner implements DataSignerInterface
     private $secret;
 
     /**
-     * @param Algorithm $hashAlgorithm
+     * @param HashAlgorithm $hashAlgorithm
      * @param string $secret
      */
-    public function __construct(Algorithm $hashAlgorithm, $secret)
+    public function __construct(HashAlgorithm $hashAlgorithm, $secret)
     {
         Expect::that($secret)->isString()->isNotEmpty();
 
@@ -35,12 +35,12 @@ class DataSigner implements DataSignerInterface
 
     /**
      * @internal public for test purpose only
-     * @param Algorithm $hashAlgorithm
+     * @param HashAlgorithm $hashAlgorithm
      * @param string $secret
      * @param string $serializedData
      * @return mixed
      */
-    public static function generateSignature(Algorithm $hashAlgorithm, $secret, $serializedData)
+    public static function generateSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData)
     {
         Expect::that($secret)->isString()->isNotEmpty();
         Expect::that($serializedData)->isString()->isNotEmpty();
@@ -50,13 +50,13 @@ class DataSigner implements DataSignerInterface
 
     /**
      * @internal public for test purpose only
-     * @param Algorithm $hashAlgorithm
+     * @param HashAlgorithm $hashAlgorithm
      * @param string $secret
      * @param string $serializedData
      * @param mixed $signature
      * @return bool
      */
-    public static function checkSignature(Algorithm $hashAlgorithm, $secret, $serializedData, $signature)
+    public static function checkSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData, $signature)
     {
         Expect::that($signature)->isNotNull();
 
@@ -99,7 +99,7 @@ class DataSigner implements DataSignerInterface
 
         $serializedData = $decoded[SignedData::JSON_SERIALIZED_DATA];
         try {
-            $hashAlgorithm = Algorithm::getEnumByValue($decoded[SignedData::JSON_ALGORITHM]);
+            $hashAlgorithm = HashAlgorithm::getEnumByValue($decoded[SignedData::JSON_ALGORITHM]);
         } catch (EnumNotFoundException $exception) {
             throw new CorruptedDataException('Unknown HashAlgorithm', $exception);
         }

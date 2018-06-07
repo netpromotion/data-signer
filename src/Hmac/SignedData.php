@@ -1,6 +1,6 @@
 <?php
 
-namespace Netpromotion\DataSigner\Hash;
+namespace Netpromotion\DataSigner\Hmac;
 
 use Netpromotion\DataSigner\SignedDataInterface;
 
@@ -16,7 +16,7 @@ class SignedData implements SignedDataInterface
     private $data;
 
     /**
-     * @var Algorithm
+     * @var HashAlgorithm
      */
     private $algorithm;
 
@@ -27,10 +27,10 @@ class SignedData implements SignedDataInterface
 
     /**
      * @param mixed $data
-     * @param Algorithm $algorithm
+     * @param HashAlgorithm $algorithm
      * @param mixed $signature
      */
-    public function __construct($data, Algorithm $algorithm, $signature)
+    public function __construct($data, HashAlgorithm $algorithm, $signature)
     {
         $this->data = $data;
         $this->algorithm = $algorithm;
@@ -46,7 +46,7 @@ class SignedData implements SignedDataInterface
     }
 
     /**
-     * @return Algorithm
+     * @return HashAlgorithm
      */
     public function getAlgorithm()
     {
