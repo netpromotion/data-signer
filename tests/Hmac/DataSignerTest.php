@@ -184,4 +184,23 @@ class DataSignerTest extends TestCase
             throw $exception;
         }
     }
+
+    public function testWithDomainReturnsDifferentDataSigner()
+    {
+        $dataSigner = $this->getDataSigner();
+        $dataSignerA = $dataSigner->withDomain('A');
+        $this->assertNotSame($dataSigner, $dataSignerA);
+    }
+
+    public function testValidDataAreInvalidOnDifferentDomain()
+    {
+        $dataSignerA = $this->getDataSigner()->withDomain('A');
+        $dataSignerB = $this->getDataSigner()->withDomain('B');
+
+        $signedDataA = $dataSignerA->signData(static::DATA);
+
+        $this->expectException(UntrustedDataException::class);
+
+        $dataSignerB->getData($signedDataA);
+    }
 }

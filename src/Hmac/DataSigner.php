@@ -22,15 +22,37 @@ class DataSigner implements DataSignerInterface
     private $secret;
 
     /**
+     * @var string|null
+     */
+    private $domain;
+
+    /**
      * @param HashAlgorithm $hashAlgorithm
      * @param string $secret
+     * @param string|null $domain
      */
-    public function __construct(HashAlgorithm $hashAlgorithm, $secret)
+    public function __construct(HashAlgorithm $hashAlgorithm, $secret, $domain = null)
     {
         Expect::that($secret)->isString()->isNotEmpty();
+        if (null !== $domain) {
+            Expect::that($domain)->isString()->isNotEmpty();
+        }
 
         $this->hashAlgorithm = $hashAlgorithm;
         $this->secret = $secret;
+        $this->domain = $domain;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function withDomain($name)
+    {
+        if (null !== $name) {
+            Expect::that($name)->isString()->isNotEmpty();
+        }
+
+        return new static($this->hashAlgorithm, $this->secret, $name);
     }
 
     /**
@@ -70,7 +92,7 @@ class DataSigner implements DataSignerInterface
     {
         return new SignedData($data, $this->hashAlgorithm, static::generateSignature(
             $this->hashAlgorithm,
-            $this->secret,
+            $this->secret . $this->domain,
             serialize($data)
         ));
     }
@@ -105,7 +127,7 @@ class DataSigner implements DataSignerInterface
         }
         $signature = base64_decode($decoded[SignedData::JSON_B64_SIGNATURE]);
 
-        if (!static::checkSignature($hashAlgorithm, $this->secret, $serializedData, $signature)) {
+        if (!static::checkSignature($hashAlgorithm, $this->secret . $this->domain, $serializedData, $signature)) {
             throw new UntrustedDataException($serializedData);
         }
 

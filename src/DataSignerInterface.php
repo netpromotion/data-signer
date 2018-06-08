@@ -8,6 +8,12 @@ use Netpromotion\DataSigner\Exception\UntrustedDataException;
 interface DataSignerInterface
 {
     /**
+     * @param string|null $name
+     * @return DataSignerInterface
+     */
+    public function withDomain($name);
+
+    /**
      * @param mixed $data
      * @return SignedDataInterface
      */
