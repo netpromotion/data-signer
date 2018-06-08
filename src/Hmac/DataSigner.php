@@ -4,6 +4,7 @@ namespace Netpromotion\DataSigner\Hmac;
 
 use Netpromotion\DataSigner\DataSignerInterface;
 use Netpromotion\DataSigner\Exception\CorruptedDataException;
+use Netpromotion\DataSigner\Exception\ExpiredDataException;
 use Netpromotion\DataSigner\Exception\UntrustedDataException;
 use Netpromotion\DataSigner\SignedDataInterface;
 use Nunzion\Expect;

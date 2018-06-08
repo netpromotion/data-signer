@@ -20,7 +20,7 @@ class SignedDataTest extends TestCase
 
     private function getMortalSignedDataAsObject()
     {
-        return new SignedData('data', Algorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='), 123);
+        return new SignedData('data', HashAlgorithm::MD5(), base64_decode('7TJ3nATVM5bTQ9Zg6Ie/sg=='), 123);
     }
 
     private function getMortalSignatureDataAsJsonString()

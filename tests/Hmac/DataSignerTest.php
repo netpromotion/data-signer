@@ -31,6 +31,7 @@ class DataSignerTest extends TestCase
         return new DataSigner(
             HashAlgorithm::getEnumByValue(static::ALGORITHM),
             static::SECRET,
+            null,
             $now
         );
     }
@@ -166,7 +167,7 @@ class DataSignerTest extends TestCase
         );
         $mortalSignedData = new SignedData(
             static::DATA,
-            Algorithm::getEnumByValue(static::ALGORITHM),
+            HashAlgorithm::getEnumByValue(static::ALGORITHM),
             base64_decode(static::B64_SIGNATURE_EXPIRE5),
             5
         );
@@ -247,7 +248,7 @@ class DataSignerTest extends TestCase
     {
         $signedData = new SignedData(
             static::DATA,
-            Algorithm::getEnumByValue(static::ALGORITHM),
+            HashAlgorithm::getEnumByValue(static::ALGORITHM),
             base64_decode(static::B64_SIGNATURE_EXPIRE1),
             1
         );
