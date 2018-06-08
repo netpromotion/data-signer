@@ -63,7 +63,7 @@ class DataSigner implements DataSignerInterface
             Expect::that($name)->isString()->isNotEmpty();
         }
 
-        return new static($this->hashAlgorithm, $this->secret, $name);
+        return new static($this->hashAlgorithm, $this->secret, $name, $this->now);
     }
 
     /**
