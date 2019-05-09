@@ -5,7 +5,7 @@
 ### Password reset
 
 ```php
-/** @var int $userId
+/** @var int $userId */
 /** @var Netpromotion\DataSigner\DataSignerInterface $signer */
 $token = (string) $signer->withDomain('user.reset_password')->signData($userId, 12 * 3600);
 send_reset_password_email($userId, $token);
