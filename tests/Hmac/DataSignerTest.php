@@ -119,7 +119,7 @@ class DataSignerTest extends TestCase
         $this->assertSame($data, $signedData->getData());
         $this->assertSame(HashAlgorithm::getEnumByValue(static::ALGORITHM), $signedData->getAlgorithm());
         $this->assertSame($expectedSignature, base64_encode($signedData->getSignature()));
-        $this->assertSame($ttl ? static::NOW_TIMESTAMP + $ttl : null, $signedData->getExpire());
+        $this->assertSame($ttl ? static::NOW_TIMESTAMP + $ttl : null, $signedData->getExpires());
     }
 
     public function dataSignsData()
