@@ -13,4 +13,9 @@ interface SignedDataInterface extends \JsonSerializable
      * @return mixed
      */
     public function getSignature();
+
+    /**
+     * @return null|int
+     */
+    public function getExpires();
 }
