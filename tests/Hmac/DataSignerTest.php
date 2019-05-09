@@ -39,18 +39,18 @@ class DataSignerTest extends TestCase
     /**
      * @dataProvider dataGeneratesCorrectSignatures
      * @param HashAlgorithm $hashAlgorithm
-     * @param int|null $expire
+     * @param int|null $expires
      * @param string $expectedSignature
      */
-    public function testGeneratesCorrectSignatures(HashAlgorithm $hashAlgorithm, $expire, $expectedSignature)
+    public function testGeneratesCorrectSignatures(HashAlgorithm $hashAlgorithm, $expires, $expectedSignature)
     {
         $this->assertSame($expectedSignature, base64_encode(DataSigner::generateSignature(
-            $hashAlgorithm, static::SECRET, static::SERIALIZED_DATA, $expire
+            $hashAlgorithm, static::SECRET, static::SERIALIZED_DATA, $expires
         )));
         $this->assertNotSame(base64_encode(DataSigner::generateSignature(
-            $hashAlgorithm, static::SECRET, static::SERIALIZED_DATA, $expire
+            $hashAlgorithm, static::SECRET, static::SERIALIZED_DATA, $expires
         )), base64_encode(DataSigner::generateSignature(
-            $hashAlgorithm, 'different secret', static::SERIALIZED_DATA, $expire
+            $hashAlgorithm, 'different secret', static::SERIALIZED_DATA, $expires
         )));
     }
 
@@ -77,15 +77,15 @@ class DataSignerTest extends TestCase
     /**
      * @dataProvider dataCheckSignatureWorks
      * @param string $signature
-     * @param int|null $expire
+     * @param int|null $expires
      * @param bool $expected
      * @throws EnumNotFoundException
      */
-    public function testCheckSignatureWorks($signature, $expire, $expected)
+    public function testCheckSignatureWorks($signature, $expires, $expected)
     {
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->assertSame($expected, DataSigner::checkSignature(
-            HashAlgorithm::getEnumByValue(static::ALGORITHM), static::SECRET, static::SERIALIZED_DATA, $expire, base64_decode($signature)
+            HashAlgorithm::getEnumByValue(static::ALGORITHM), static::SECRET, static::SERIALIZED_DATA, $expires, base64_decode($signature)
         ));
     }
 

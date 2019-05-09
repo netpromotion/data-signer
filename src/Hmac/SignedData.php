@@ -29,20 +29,20 @@ class SignedData implements SignedDataInterface
     /**
      * @var int|null
      */
-    private $expire;
+    private $expires;
 
     /**
      * @param mixed $data
      * @param HashAlgorithm $algorithm
      * @param mixed $signature
-     * @param int|null $expire
+     * @param int|null $expires
      */
-    public function __construct($data, HashAlgorithm $algorithm, $signature, $expire = null)
+    public function __construct($data, HashAlgorithm $algorithm, $signature, $expires = null)
     {
         $this->data = $data;
         $this->algorithm = $algorithm;
         $this->signature = $signature;
-        $this->expire = $expire;
+        $this->expires = $expires;
     }
 
     /**
@@ -72,9 +72,9 @@ class SignedData implements SignedDataInterface
     /**
      * @inheritdoc
      */
-    public function getExpire()
+    public function getExpires()
     {
-        return $this->expire;
+        return $this->expires;
     }
 
     /**
@@ -88,8 +88,8 @@ class SignedData implements SignedDataInterface
             static::JSON_B64_SIGNATURE => base64_encode($this->signature)
         ];
 
-        if (null !== $this->expire) {
-            $data[static::JSON_EXPIRE] = $this->expire;
+        if (null !== $this->expires) {
+            $data[static::JSON_EXPIRE] = $this->expires;
         }
 
         return $data;

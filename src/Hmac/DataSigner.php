@@ -71,19 +71,19 @@ class DataSigner implements DataSignerInterface
      * @param HashAlgorithm $hashAlgorithm
      * @param string $secret
      * @param string $serializedData
-     * @param int|null $expire
+     * @param int|null $expires
      * @return mixed
      */
-    public static function generateSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData, $expire)
+    public static function generateSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData, $expires)
     {
         Expect::that($secret)->isString()->isNotEmpty();
         Expect::that($serializedData)->isString()->isNotEmpty();
 
-        if (null !== $expire) {
-            Expect::that($expire)->isInt();
+        if (null !== $expires) {
+            Expect::that($expires)->isInt();
         }
 
-        return hash_hmac($hashAlgorithm, $serializedData . $expire, $secret, true);
+        return hash_hmac($hashAlgorithm, $serializedData . $expires, $secret, true);
     }
 
     /**
@@ -91,15 +91,15 @@ class DataSigner implements DataSignerInterface
      * @param HashAlgorithm $hashAlgorithm
      * @param string $secret
      * @param string $serializedData
-     * @param int|null $expire
+     * @param int|null $expires
      * @param mixed $signature
      * @return bool
      */
-    public static function checkSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData, $expire, $signature)
+    public static function checkSignature(HashAlgorithm $hashAlgorithm, $secret, $serializedData, $expires, $signature)
     {
         Expect::that($signature)->isNotNull();
 
-        return static::generateSignature($hashAlgorithm, $secret, $serializedData, $expire) === $signature;
+        return static::generateSignature($hashAlgorithm, $secret, $serializedData, $expires) === $signature;
     }
 
     /**
@@ -109,17 +109,17 @@ class DataSigner implements DataSignerInterface
     {
         if (null !== $timeToLive) {
             Expect::that($timeToLive)->isInt()->isGreaterThan(0);
-            $expire = $this->now->getTimestamp() + $timeToLive;
+            $expires = $this->now->getTimestamp() + $timeToLive;
         } else {
-            $expire = null;
+            $expires = null;
         }
 
         return new SignedData($data, $this->hashAlgorithm, static::generateSignature(
             $this->hashAlgorithm,
             $this->secret . $this->domain,
             serialize($data),
-            $expire
-        ), $expire);
+            $expires
+        ), $expires);
     }
 
     /**
@@ -151,16 +151,16 @@ class DataSigner implements DataSignerInterface
             throw new CorruptedDataException('Unknown HashAlgorithm', $exception);
         }
         $signature = base64_decode($decoded[SignedData::JSON_B64_SIGNATURE]);
-        $expire = @$decoded[SignedData::JSON_EXPIRE];
-        if (null !== $expire) {
-            $expire = (int)$expire;
+        $expires = @$decoded[SignedData::JSON_EXPIRE];
+        if (null !== $expires) {
+            $expires = (int)$expires;
         }
 
-        if (!static::checkSignature($hashAlgorithm, $this->secret . $this->domain, $serializedData, $expire, $signature)) {
+        if (!static::checkSignature($hashAlgorithm, $this->secret . $this->domain, $serializedData, $expires, $signature)) {
             throw new UntrustedDataException($serializedData);
         }
 
-        if (null !== $expire && $this->now->getTimestamp() > $expire) {
+        if (null !== $expires && $this->now->getTimestamp() > $expires) {
             throw new ExpiredDataException($serializedData);
         }
 
