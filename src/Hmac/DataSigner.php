@@ -67,6 +67,15 @@ class DataSigner implements DataSignerInterface
     }
 
     /**
+     * @param \DateTimeInterface $now
+     * @return self
+     */
+    public function withNow(\DateTimeInterface $now)
+    {
+        return new static($this->hashAlgorithm, $this->secret, $this->domain, $now);
+    }
+
+    /**
      * @internal public for test purpose only
      * @param HashAlgorithm $hashAlgorithm
      * @param string $secret

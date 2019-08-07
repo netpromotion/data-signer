@@ -284,6 +284,13 @@ class DataSignerTest extends TestCase
         $this->assertNotSame($dataSigner, $dataSignerA);
     }
 
+    public function testWithNowReturnsDifferentDataSigner()
+    {
+        $dataSigner = $this->getDataSigner();
+        $dataSignerNow = $dataSigner->withNow(new \DateTime());
+        $this->assertNotSame($dataSigner, $dataSignerNow);
+    }
+
     public function testValidDataAreInvalidOnDifferentDomain()
     {
         $dataSignerA = $this->getDataSigner()->withDomain('A');
