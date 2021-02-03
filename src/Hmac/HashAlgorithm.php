@@ -5,7 +5,6 @@ namespace Netpromotion\DataSigner\Hmac;
 use PetrKnap\Php\Enum\Enum;
 
 /**
- * @method static HashAlgorithm CRC32
  * @method static HashAlgorithm MD5
  * @method static HashAlgorithm SHA1
  * @method static HashAlgorithm SHA256

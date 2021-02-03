@@ -69,8 +69,6 @@ class DataSignerTest extends TestCase
             [HashAlgorithm::SHA512(), 1, 'lHQ6v3JJUrjTk0duQhJPDd1p3LJZiXA20x8zgPWbUGeeQCizQZOHdoQJaa6TyvkQRJ3PPxBt45QvTGnsbZB/ZQ=='],
             [HashAlgorithm::WHIRLPOOL(), null, 'CuQ0i2+3m6wwmDzp/qrRAzc+K/FjA6SLSxWaYnxwswGRwvb8OZ+NGWMQLhI8EnLtzHKBK31tC8cw2eIA/RqwEQ=='],
             [HashAlgorithm::WHIRLPOOL(), 1, 'xRpSDcEJE2+ZHpO0UFzFVaEt2XdmSFVPwfv8VCgkuEF0bDKDOHQQT/DyjJGiTM6UI0uIolj59cY3BmdfUORaHg=='],
-            [HashAlgorithm::CRC32(), null, 'JCVcbQ=='],
-            [HashAlgorithm::CRC32(), 1, 'O6XitA=='],
         ];
     }
 
