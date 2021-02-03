@@ -1,6 +1,6 @@
 <?php
 
-namespace Netpromotion\Test\DataSigner\Hmac;
+namespace Netpromotion\DataSigner\Test\Hmac;
 
 use Netpromotion\DataSigner\Exception\CorruptedDataException;
 use Netpromotion\DataSigner\Exception\ExpiredDataException;
